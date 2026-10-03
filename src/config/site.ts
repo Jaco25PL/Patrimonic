@@ -9,5 +9,5 @@ export const site = {
   dates: { sab: "2026-10-03", dom: "2026-10-04" },
   source: "Guía oficial de actividades · Comisión del Patrimonio Cultural de la Nación (MEC)",
   sourceUrl: "https://diadelpatrimonio.mec.gub.uy",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://huella.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://patrimonic.vercel.app",
 } as const;
