@@ -48,15 +48,26 @@ export function getPlace(slug: string): Place | undefined {
   return bySlug.get(slug);
 }
 
-export function getFeatured(limit = 14): Place[] {
-  return featuredOrder
-    .map((slug) => bySlug.get(slug))
-    .filter((p): p is Place => Boolean(p?.photo))
-    .slice(0, limit);
+export function getLocalities(): { name: string; dept: string; count: number }[] {
+  const counts = new Map<string, { name: string; dept: string; count: number }>();
+  for (const p of places) {
+    const key = `${p.dept}/${p.locality}`;
+    const entry = counts.get(key) ?? { name: p.locality, dept: p.dept, count: 0 };
+    entry.count++;
+    counts.set(key, entry);
+  }
+  const deptIndex = (d: string) => DEPARTMENTS.indexOf(d as (typeof DEPARTMENTS)[number]);
+  return [...counts.values()].sort(
+    (a, b) => deptIndex(a.dept) - deptIndex(b.dept) || a.name.localeCompare(b.name, "es"),
+  );
 }
 
-export function toSummary(p: Place): PlaceSummary {
+const rankBySlug = new Map(featuredOrder.map((slug, i) => [slug, i]));
+
+/** `withBlur` ships the tiny blur placeholder too (only worth it for the first rail cards). */
+export function toSummary(p: Place, withBlur = false): PlaceSummary {
   const activity = p.activities[0] ?? null;
+  const rank = p.photo && !p.photo.auto ? (rankBySlug.get(p.slug) ?? null) : null;
   return {
     slug: p.slug,
     name: p.name,
@@ -66,7 +77,8 @@ export function toSummary(p: Place): PlaceSummary {
     address: p.address,
     days: p.days,
     category: p.category,
-    photo: p.photo ? { src: p.photo.src, blur: null } : null,
+    photo: p.photo ? { src: p.photo.src, blur: withBlur ? p.photo.blur : null } : null,
+    rank,
     search: normalize(
       [p.name, activity, p.locality, p.dept, p.address, getCategory(p.category).label, p.municipio].join(" "),
     ),

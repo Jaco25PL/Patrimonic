@@ -22,6 +22,8 @@ export interface Photo {
   license: string | null;
   licenseUrl: string | null;
   page: string;
+  /** Found by the automatic search (not hand-picked): never used to lead the rail unfiltered. */
+  auto?: boolean;
 }
 
 /** A venue taking part in the event, as published in the official guide. */
@@ -54,6 +56,8 @@ export interface PlaceSummary {
   days: Day[];
   category: CategoryId;
   photo: Pick<Photo, "src" | "blur"> | null;
+  /** Position in the curated "Imperdibles" order; lower is more iconic. Null when not curated. */
+  rank: number | null;
   /** Pre-normalized haystack for instant search. */
   search: string;
 }

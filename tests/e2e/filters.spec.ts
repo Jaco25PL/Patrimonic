@@ -31,7 +31,7 @@ test("filtro por día reduce y es coherente", async ({ page }) => {
 });
 
 test("filtro por departamento", async ({ page }) => {
-  await page.getByLabel("Departamento").selectOption("Colonia");
+  await page.getByLabel("Departamento", { exact: true }).selectOption("Colonia");
   await expect(count(page)).toHaveText("28 lugares");
   const subtitles = await page.locator("section[aria-label=Lugares] h3 span:nth-child(2)").allTextContents();
   expect(new Set(subtitles.filter(Boolean))).toEqual(new Set(["Colonia"]));
@@ -40,19 +40,19 @@ test("filtro por departamento", async ({ page }) => {
 test("filtro por categoría + vacío + reset", async ({ page }) => {
   await page.getByRole("button", { name: "Faros", exact: true }).click();
   await expectCount(page, (n) => n >= 4 && n < 20);
-  await page.getByLabel("Departamento").selectOption("Flores");
+  await page.getByLabel("Departamento", { exact: true }).selectOption("Flores");
   await expect(page.getByText("Nada por acá")).toBeVisible();
   await page.getByRole("button", { name: "Ver todos los lugares" }).click();
   await expect(count(page)).toHaveText("491 lugares");
 });
 
 test("los filtros se mantienen al entrar a un lugar y volver", async ({ page }) => {
-  await page.getByLabel("Departamento").selectOption("Rocha");
+  await page.getByLabel("Departamento", { exact: true }).selectOption("Rocha");
   await page.getByLabel("Buscar").fill("faro");
   await page.getByRole("link", { name: /Faro de Santa María/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Faro de Santa María" })).toBeVisible();
   await page.getByRole("button", { name: "Volver" }).click();
   await expect(page).toHaveURL("/");
   await expect(page.getByLabel("Buscar")).toHaveValue("faro");
-  await expect(page.getByLabel("Departamento")).toHaveValue("Rocha");
+  await expect(page.getByLabel("Departamento", { exact: true })).toHaveValue("Rocha");
 });

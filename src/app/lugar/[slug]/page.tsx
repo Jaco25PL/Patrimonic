@@ -45,7 +45,7 @@ export default async function PlacePage({ params }: { params: Promise<Params> })
 
   const category = getCategory(place.category);
   const program = parseProgram(place.program);
-  const related = getRelated(place).map(toSummary);
+  const related = getRelated(place).map((p) => toSummary(p));
   const directions = directionsUrl(place);
   const where = place.locality === place.dept ? place.dept : `${place.locality}, ${place.dept}`;
 

@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Day, PlaceSummary } from "@/domain/place";
-import { filterPlaces, groupPlaces, isFiltering } from "@/domain/filter";
+import { featuredFor, filterPlaces, groupPlaces, isFiltering } from "@/domain/filter";
 import { currentEventDay } from "@/domain/days";
 import { site } from "@/config/site";
 import { useSaved } from "@/hooks/useSaved";
@@ -25,12 +25,12 @@ let autoDayApplied = false;
 
 export function Explorer({
   places,
-  featured,
   departments,
+  localities,
 }: {
   places: PlaceSummary[];
-  featured: PlaceSummary[];
   departments: { name: string; count: number }[];
+  localities: { name: string; dept: string; count: number }[];
 }) {
   const { criteria, update, reset } = useCriteria();
   const { saved, count: savedCount } = useSaved();
@@ -62,10 +62,8 @@ export function Explorer({
     [places, criteria, deferredQuery, saved],
   );
   const groups = useMemo(() => groupPlaces(results), [results]);
-  const featuredForDay = useMemo(
-    () => (criteria.day === "all" ? featured : featured.filter((p) => p.days.includes(criteria.day as Day))),
-    [featured, criteria.day],
-  );
+  const featured = useMemo(() => featuredFor(places, criteria), [places, criteria]);
+  const scope = criteria.locality !== "all" ? criteria.locality : criteria.dept !== "all" ? criteria.dept : null;
 
   // Keep the first result in view when filters change while scrolled down.
   const scrollToList = () => {
@@ -110,11 +108,17 @@ export function Explorer({
           </div>
         </div>
         <div className="mx-auto max-w-5xl pb-3 md:px-4">
-          <FilterChips criteria={criteria} update={change} departments={departments} savedCount={savedCount} />
+          <FilterChips
+            criteria={criteria}
+            update={change}
+            departments={departments}
+            localities={localities}
+            savedCount={savedCount}
+          />
         </div>
       </div>
 
-      {!filtering && <FeaturedRail places={featuredForDay} />}
+      <FeaturedRail places={featured} scope={scope} />
 
       <div ref={listTop} className="scroll-mt-[190px]" />
       <section aria-label="Lugares" className="mx-auto max-w-5xl px-4 md:px-8">

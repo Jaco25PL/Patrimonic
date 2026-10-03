@@ -28,5 +28,16 @@
   "license": null,
   "licenseUrl": null,
   "page": "https://commons.wikimedia.org/wiki/File:Does_not_exist.jpg"
+ },
+ "teatro-victoria": {
+  "src": "/photos/palacio-salvo.jpg",
+  "width": 1280,
+  "height": 853,
+  "blur": null,
+  "author": "Auto",
+  "license": "CC BY 4.0",
+  "licenseUrl": null,
+  "page": "https://commons.wikimedia.org/wiki/File:Teatro_Victoria.jpg",
+  "auto": true
  }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "@/domain/text";
-import { EMPTY_CRITERIA, filterPlaces, groupPlaces, isFiltering } from "@/domain/filter";
+import { EMPTY_CRITERIA, featuredFor, filterPlaces, groupPlaces, isFiltering } from "@/domain/filter";
 import { directionsUrl, mapsQuery } from "@/domain/maps";
 import { currentEventDay, describeDays } from "@/domain/days";
 import { parseProgram } from "@/domain/program";
@@ -17,6 +17,7 @@ const mk = (o: Partial<PlaceSummary>): PlaceSummary => ({
   category: "museos",
   photo: null,
   search: "",
+  rank: null,
   ...o,
 });
 const a = mk({ slug: "a", name: "Castillo de Piria", dept: "Canelones", locality: "Progreso", days: ["sab"], category: "palacios", search: normalize("Castillo de Piria Progreso Canelones") });
@@ -115,5 +116,33 @@ describe("parseProgram", () => {
   });
   it("no confunde calles 'Domingo Cullen' con un día", () => {
     expect(parseProgram(["Domingo Cullen 895"])[0]!.day).toBeNull();
+  });
+});
+
+describe("localidad y carrusel de imperdibles", () => {
+  const photo = { src: "/p.jpg", blur: null };
+  const salvo = mk({ slug: "salvo", locality: "Centro", photo, rank: 0 });
+  const cabildo = mk({ slug: "cabildo", locality: "Ciudad Vieja", photo, rank: 3, days: ["dom"] });
+  const auto = mk({ slug: "auto", locality: "Ciudad Vieja", photo, rank: null });
+  const sinFoto = mk({ slug: "sin-foto", locality: "Ciudad Vieja", rank: null });
+  const piria = mk({ slug: "piria", dept: "Canelones", locality: "Progreso", photo, rank: 1 });
+  const all = [sinFoto, auto, cabildo, piria, salvo];
+
+  it("filtra por localidad", () => {
+    expect(filterPlaces(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }, new Set()).map((p) => p.slug)).toEqual(["sin-foto", "auto", "cabildo"]);
+  });
+  it("sin filtros: solo curados, en orden", () => {
+    expect(featuredFor(all, EMPTY_CRITERIA).map((p) => p.slug)).toEqual(["salvo", "piria", "cabildo"]);
+  });
+  it("con departamento: se mantiene, con curados primero y luego fotos automáticas", () => {
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, dept: "Montevideo" }).map((p) => p.slug)).toEqual(["salvo", "cabildo", "auto"]);
+  });
+  it("con localidad y día", () => {
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }).map((p) => p.slug)).toEqual(["cabildo", "auto"]);
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja", day: "sab" }).map((p) => p.slug)).toEqual(["auto"]);
+  });
+  it("se oculta al buscar o en Mi recorrido", () => {
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, query: "x" })).toEqual([]);
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, onlySaved: true })).toEqual([]);
   });
 });

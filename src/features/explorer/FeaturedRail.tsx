@@ -3,20 +3,22 @@ import type { PlaceSummary } from "@/domain/place";
 import { getCategory } from "@/domain/categories";
 import { PlacePhoto } from "@/components/PlacePhoto";
 
-export function FeaturedRail({ places }: { places: PlaceSummary[] }) {
+export function FeaturedRail({ places, scope }: { places: PlaceSummary[]; scope: string | null }) {
   if (!places.length) return null;
   return (
     <section aria-labelledby="featured-title" className="pt-2 pb-4">
       <div className="mx-auto max-w-5xl px-4 md:px-8">
         <h2 id="featured-title" className="t-title-2">
-          Imperdibles
+          {scope ? `Imperdibles en ${scope}` : "Imperdibles"}
         </h2>
-        <p className="t-subhead mt-0.5 text-ink-2">Los íconos que abren este fin de semana.</p>
+        <p className="t-subhead mt-0.5 text-ink-2">
+          {scope ? "Lo más lindo para ver por la zona." : "Los íconos que abren este fin de semana."}
+        </p>
       </div>
       <div className="rail no-scrollbar mt-3 gap-3 pb-3 md:mx-auto md:max-w-5xl">
         {places.map((p, i) => (
           <Link
-            key={p.slug}
+            key={`${scope}-${p.slug}`}
             href={`/lugar/${p.slug}`}
             className="pressable hover-lift anim-rise relative block aspect-[4/5] w-[72vw] max-w-[300px] overflow-hidden rounded-[26px] bg-surface-2 shadow-[var(--shadow-card)]"
             style={{ "--i": Math.min(i, 6) } as React.CSSProperties}

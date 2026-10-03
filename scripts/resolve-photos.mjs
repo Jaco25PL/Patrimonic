@@ -13,6 +13,7 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SOURCES = process.env.PHOTOS_SOURCES ?? path.join(ROOT, "data/photo-sources.json");
 const OUTPUT = process.env.PHOTOS_OUTPUT ?? path.join(ROOT, "src/data/photos.generated.json");
+const PLACES = process.env.PHOTOS_PLACES ?? path.join(ROOT, "src/data/places.json");
 const PHOTO_DIR = process.env.PHOTOS_DIR ?? path.join(ROOT, "public/photos");
 
 const API = process.env.COMMONS_API ?? "https://commons.wikimedia.org/w/api.php";
@@ -31,7 +32,7 @@ async function api(params) {
 const IMAGEINFO = {
   prop: "imageinfo",
   iiprop: "url|size|mime|extmetadata",
-  iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl",
+  iiextmetadatafilter: "Artist|LicenseShortName|LicenseUrl|Categories|ImageDescription",
   iiurlwidth: String(THUMB_WIDTH),
 };
 
@@ -54,7 +55,71 @@ function toPhoto(page) {
     licenseUrl: meta.LicenseUrl?.value ?? null,
     page: info.descriptionurl,
     title: page.title,
+    context: `${page.title} ${meta.Categories?.value ?? ""} ${stripHtml(meta.ImageDescription?.value)}`,
   };
+}
+
+// ── Automatic search for places without a hand-picked photo ──────────────────
+// Precision over recall: a missing photo shows the illustrated poster, a wrong
+// photo misleads people. A result is accepted only when its file title carries
+// the place's distinctive name words AND its metadata places it in Uruguay.
+
+const norm = (t = "") => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const GENERIC = new Set(
+  ("de del la las los el y e en a al n nro no sede espacio centro cultural casa museo sala club escuela iglesia parroquia " +
+    "capilla nacional historico historica municipal departamental plaza parque biblioteca instituto asociacion sociedad " +
+    "uruguay uruguayo uruguaya colegio liceo local comision fomento muestra visita recorrido exposicion taller arte " +
+    "nuestra senora san santa santo dr prof gral general mtro ing arq y/o udelar intendencia municipio direccion " +
+    "edificio antiguo ex hall predio galpon")
+    .split(" "),
+);
+const TYPES = ["museo", "teatro", "iglesia", "parroquia", "capilla", "catedral", "basilica", "castillo", "palacio", "faro", "estadio", "cementerio", "mercado", "estacion", "fortaleza", "fuerte", "molino", "hotel", "bodega", "quinta"];
+
+export function distinctiveTokens(name) {
+  return [...new Set(norm(name).split(/[^a-z0-9]+/).filter((t) => t.length > 2 && !GENERIC.has(t) && !/^\d+$/.test(t)))];
+}
+
+export function acceptsAuto(place, photo) {
+  const title = norm(photo.title);
+  const tokens = distinctiveTokens(place.name);
+  if (!tokens.length) return false;
+  const hits = tokens.filter((t) => title.includes(t)).length;
+  if (tokens.length <= 2 ? hits < tokens.length : hits / tokens.length < 0.6) return false;
+  const type = TYPES.find((t) => norm(place.name).startsWith(t) || norm(place.name).includes(` ${t} `));
+  if (type && !title.includes(type)) return false;
+  if (AVOID.test(photo.title)) return false;
+  const context = norm(photo.context);
+  return [place.locality, place.dept, "uruguay", "montevideo"].some((w) => context.includes(norm(w)));
+}
+
+async function resolveAuto(place) {
+  const where = place.locality === place.dept ? place.dept : `${place.locality} ${place.dept}`;
+  const data = await api({
+    action: "query",
+    generator: "search",
+    gsrsearch: `${place.name} ${where}`,
+    gsrnamespace: "6",
+    gsrlimit: "10",
+    ...IMAGEINFO,
+  });
+  const photos = (data.query?.pages ?? []).map(toPhoto).filter((p) => p && acceptsAuto(place, p));
+  photos.sort((a, b) => score(b) - score(a));
+  return photos[0] ?? null;
+}
+
+/** Runs `fn` over `items` with at most `n` in flight (polite to the Commons API). */
+async function pool(items, n, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: n }, async () => {
+      while (next < items.length) {
+        const i = next++;
+        out[i] = await fn(items[i]).catch(() => null);
+      }
+    }),
+  );
+  return out;
 }
 
 function score(photo) {
@@ -129,8 +194,8 @@ async function blurDataUrl(src) {
 }
 
 async function main() {
-  const { places } = JSON.parse(await readFile(SOURCES, "utf8"));
-  const entries = Object.entries(places);
+  const { places: sources } = JSON.parse(await readFile(SOURCES, "utf8"));
+  const entries = Object.entries(sources);
 
   await rm(PHOTO_DIR, { recursive: true, force: true });
   await mkdir(PHOTO_DIR, { recursive: true });
@@ -138,26 +203,42 @@ async function main() {
   const fileTitles = [...new Set(entries.flatMap(([, list]) => list.filter((s) => s.startsWith("File:"))))];
   const files = await resolveFiles(fileTitles);
 
-  const result = {};
+  const chosen = new Map();
   for (const [slug, candidates] of entries) {
-    let photo = null;
     for (const candidate of candidates) {
-      photo = candidate.startsWith("Category:") ? await resolveCategory(candidate).catch(() => null) : files.get(candidate);
-      if (photo) break;
+      const photo = candidate.startsWith("Category:") ? await resolveCategory(candidate).catch(() => null) : files.get(candidate);
+      if (photo) {
+        chosen.set(slug, photo);
+        break;
+      }
     }
-    if (!photo) {
-      console.warn(`  · sin foto: ${slug}`);
-      continue;
-    }
-    const { originalWidth, originalHeight, title, ...rest } = photo;
-    result[slug] = { ...rest, src: await download(slug, photo.src), blur: await blurDataUrl(photo.src) };
+    if (!chosen.has(slug)) console.warn(`  · sin foto curada: ${slug}`);
   }
+  const curated = chosen.size;
+
+  // Every other place: automatic search with strict acceptance rules.
+  const places = JSON.parse(await readFile(PLACES, "utf8"));
+  const pending = places.filter((p) => !chosen.has(p.slug));
+  const found = await pool(pending, 6, resolveAuto);
+  const usedFiles = new Set([...chosen.values()].map((p) => p.title));
+  pending.forEach((place, i) => {
+    const photo = found[i];
+    if (!photo || usedFiles.has(photo.title)) return; // never reuse one photo for two places
+    usedFiles.add(photo.title);
+    chosen.set(place.slug, { ...photo, auto: true });
+  });
+
+  const result = {};
+  await pool([...chosen], 6, async ([slug, photo]) => {
+    const { originalWidth, originalHeight, title, context, ...rest } = photo;
+    result[slug] = { ...rest, src: await download(slug, photo.src), blur: await blurDataUrl(photo.src) };
+  });
 
   await writeFile(OUTPUT, JSON.stringify(result, null, 1) + "\n");
-  console.log(`✓ fotos: ${Object.keys(result).length}/${entries.length} lugares con foto`);
+  console.log(`✓ fotos: ${curated}/${entries.length} curadas + ${chosen.size - curated} automáticas = ${Object.keys(result).length}/${places.length} lugares con foto`);
 }
 
-main().catch(async (error) => {
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(async (error) => {
   console.warn(`⚠ No se pudieron resolver las fotos (${error.message}). Se mantiene el archivo existente.`);
   try {
     await readFile(OUTPUT);
