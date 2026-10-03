@@ -51,7 +51,23 @@ function handler(req: import("node:http").IncomingMessage, res: import("node:htt
   // Like CirrusSearch: every word must match, so "Facultad de Química Aguada" finds nothing
   if (search === "Facultad de Química") pages = [info("Facultad de Química, Universidad de la República (Montevideo).jpg", 3000, 2000)];
   if (search.startsWith("Taller de Arte")) pages = [info("Taller de arte.jpg", 3000, 2000)];
-  if (url.searchParams.get("titles")) pages = [info("Good.jpg", 4000, 3000), info("broken.jpg", 4000, 3000)];
+  const titles = url.searchParams.get("titles");
+  if (titles)
+    pages = titles
+      .split("|")
+      .filter((t) => !t.includes("Missing"))
+      .map((t) => info(t.replace(/^File:/, ""), 4000, 3000));
+  // Spanish Wikipedia (same fake server, /wiki path)
+  if (url.pathname.startsWith("/wiki")) {
+    pages = [];
+    if (search.startsWith("Museo Juan Manuel Blanes"))
+      pages = [{ index: 1, title: "Museo Juan Manuel Blanes", pageimage: "Museo_Blanes_fachada.jpg", extract: "Es un museo de arte ubicado en el Prado de Montevideo, Uruguay." }];
+    if (search.startsWith("Museo de la Memoria"))
+      pages = [{ index: 1, title: "Museo de la Memoria", pageimage: "Memoria_Chile.jpg", extract: "Museo en Santiago de Chile." }];
+    return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ query: { pages } }));
+  }
+  // Zone fallback: photos of the city
+  if (search === "Montevideo Uruguay") pages = [info("Rambla de Montevideo.jpg", 4000, 2600), info("Montevideo skyline.jpg", 4000, 2400)];
   if (url.searchParams.get("gcmtitle") === "Category:Mix")
     pages = [info("Plano_interior.jpg", 4000, 3000), info("Fachada.jpg", 3000, 2000), info("Vertical.jpg", 2000, 4000)];
   res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ query: { pages } }));
@@ -88,13 +104,14 @@ describe("resolve-photos (build)", () => {
         P("teatro-victoria", "Teatro Victoria"),
         P("museo-de-la-memoria", "Museo de la Memoria"),
         P("taller-de-arte", "Taller de Arte"),
+        P("museo-blanes", "Museo Juan Manuel Blanes"),
         { slug: "facultad-de-quimica-udelar", name: "Facultad de Química – Udelar", locality: "Aguada", dept: "Montevideo" },
       ]),
     );
     const out = path.join(dir, "out.json");
     const photos = path.join(dir, "photos");
     await promisify(execFile)("node", ["scripts/resolve-photos.mjs"], {
-      env: { ...process.env, COMMONS_API: `${base}/w/api.php`, PHOTOS_SOURCES: sources, PHOTOS_PLACES: placesFile, PHOTOS_OUTPUT: out, PHOTOS_DIR: photos },
+      env: { ...process.env, COMMONS_API: `${base}/w/api.php`, WIKIPEDIA_API: `${base}/wiki/api.php`, PHOTOS_SOURCES: sources, PHOTOS_PLACES: placesFile, PHOTOS_OUTPUT: out, PHOTOS_DIR: photos },
     });
     const result = JSON.parse(await readFile(out, "utf8"));
 
@@ -105,20 +122,31 @@ describe("resolve-photos (build)", () => {
     expect(result["lugar-categoria"].src).toBe("/photos/lugar-categoria.jpg");
     // Descarga fallida: queda la URL remota como respaldo (permitida en next.config)
     expect(result["lugar-roto"].src).toMatch(/\/thumb\/1280px-broken\.jpg$/);
-    // Sin candidatos válidos: sin foto (la app muestra el póster)
+    // Ningún lugar del dataset queda sin foto
+    const all = JSON.parse(await readFile(placesFile, "utf8")) as { slug: string }[];
+    expect(all.filter((p) => !result[p.slug]).map((p) => p.slug)).toEqual([]);
+    // Slugs curados que no existen en el dataset no generan nada
     expect(result["lugar-nada"]).toBeUndefined();
 
     // Búsqueda automática: acepta la foto correcta y la marca como automática…
     expect(result["teatro-victoria"]).toMatchObject({ src: "/photos/teatro-victoria.jpg", auto: true });
     expect(result["teatro-victoria"].page).toContain("Teatro Victoria (Montevideo)");
-    // …y rechaza homónimos de otro país y nombres genéricos
-    expect(result["museo-de-la-memoria"]).toBeUndefined();
-    expect(result["taller-de-arte"]).toBeUndefined();
+    // Wikipedia: foto principal del artículo, si el artículo es del lugar y de Uruguay
+    expect(result["museo-blanes"]).toMatchObject({ src: "/photos/museo-blanes.jpg", auto: true });
+    expect(result["museo-blanes"].page).toContain("Museo_Blanes_fachada.jpg");
+    // Homónimos de otro país y nombres genéricos no toman foto "del lugar":
+    // caen a una foto ilustrativa de la zona, alternando entre las disponibles.
+    expect(result["museo-de-la-memoria"]).toMatchObject({ zone: "Montevideo", auto: true });
+    expect(result["taller-de-arte"]).toMatchObject({ zone: "Montevideo", auto: true });
+    expect(result["museo-de-la-memoria"].page).not.toBe(result["taller-de-arte"].page);
+    expect(result["museo-de-la-memoria"].src).toMatch(/^\/photos\/zona-/);
     expect(result["lugar-file"].auto).toBeUndefined();
     // Busca primero con el nombre limpio (sin "– Udelar" ni el barrio)
     expect(result["facultad-de-quimica-udelar"]).toMatchObject({ auto: true });
 
-    expect((await readdir(photos)).sort()).toEqual(["facultad-de-quimica-udelar.jpg", "lugar-categoria.jpg", "lugar-file.jpg", "teatro-victoria.jpg"]);
+    const files = await readdir(photos);
+    expect(files).toEqual(expect.arrayContaining(["facultad-de-quimica-udelar.jpg", "lugar-categoria.jpg", "lugar-file.jpg", "museo-blanes.jpg", "teatro-victoria.jpg"]));
+    expect(files.filter((f) => f.startsWith("zona-"))).toHaveLength(2); // cada foto de zona se descarga una sola vez
     expect(seen.every((s) => s.endsWith("ua-ok"))).toBe(true); // Wikimedia exige User-Agent
   });
 });

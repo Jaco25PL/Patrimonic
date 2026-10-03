@@ -35,7 +35,7 @@ export function filterPlaces(places: PlaceSummary[], c: Criteria, saved: Readonl
  */
 export function featuredFor(places: PlaceSummary[], c: Criteria, limit = 12): PlaceSummary[] {
   if (c.query.trim() !== "" || c.onlySaved) return [];
-  const scoped = filterPlaces(places, { ...c, query: "", onlySaved: false }, new Set()).filter((p) => p.photo);
+  const scoped = filterPlaces(places, { ...c, query: "", onlySaved: false }, new Set()).filter((p) => p.photo && !p.illustrative);
   const unfiltered = c.dept === "all" && c.locality === "all" && c.category === "all";
   return scoped
     .filter((p) => !unfiltered || p.rank !== null)

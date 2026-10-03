@@ -47,3 +47,14 @@ test("las tarjetas de la lista muestran la foto cuando el lugar tiene una", asyn
   await expect(img).toBeVisible();
   await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
 });
+
+test("lugar sin foto propia muestra una foto ilustrativa de la zona, avisándolo", async ({ page }) => {
+  await page.goto("/lugar/facultad-de-medicina-udelar");
+  await expect(page.getByText("Foto ilustrativa · Aguada")).toBeVisible();
+  await expect(page.getByText("Foto ilustrativa de Aguada:")).toBeVisible();
+  await expect(page.getByRole("img", { name: "Facultad de Medicina – Udelar" }).first()).toBeVisible();
+  // …y nunca aparece en Imperdibles
+  await page.goto("/");
+  await page.getByLabel("Localidad").selectOption("Montevideo/Aguada");
+  await expect(rail(page).getByText("Facultad de Medicina")).toHaveCount(0);
+});

@@ -79,6 +79,7 @@ export function toSummary(p: Place, withBlur = false): PlaceSummary {
     category: p.category,
     photo: p.photo ? { src: p.photo.src, blur: withBlur ? p.photo.blur : null } : null,
     rank,
+    illustrative: Boolean(p.photo?.zone),
     search: normalize(
       [p.name, activity, p.locality, p.dept, p.address, getCategory(p.category).label, p.municipio].join(" "),
     ),

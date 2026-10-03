@@ -65,6 +65,11 @@ export default async function PlacePage({ params }: { params: Promise<Params> })
         </div>
         <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/45 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/50 to-transparent" />
+        {place.photo?.zone && (
+          <p className="material-dark absolute right-4 bottom-11 rounded-full px-2.5 py-1 text-[0.75rem] font-medium text-white/90">
+            Foto ilustrativa · {place.photo.zone}
+          </p>
+        )}
         <nav className="safe-top absolute inset-x-0 top-0 mx-auto flex max-w-3xl items-center justify-between px-4 pt-3">
           <BackButton />
           <div className="flex gap-2.5">
@@ -168,7 +173,7 @@ export default async function PlacePage({ params }: { params: Promise<Params> })
           <footer className="t-footnote mt-12 space-y-1.5 text-ink-3">
             {place.photo && (
               <p>
-                Foto:{" "}
+                {place.photo.zone ? `Foto ilustrativa de ${place.photo.zone}: ` : "Foto: "}
                 <a href={place.photo.page} target="_blank" rel="noreferrer" className="underline decoration-separator underline-offset-2">
                   {place.photo.author}
                 </a>

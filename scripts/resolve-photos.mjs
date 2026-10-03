@@ -17,13 +17,14 @@ const PLACES = process.env.PHOTOS_PLACES ?? path.join(ROOT, "src/data/places.jso
 const PHOTO_DIR = process.env.PHOTOS_DIR ?? path.join(ROOT, "public/photos");
 
 const API = process.env.COMMONS_API ?? "https://commons.wikimedia.org/w/api.php";
+const WIKIPEDIA_API = process.env.WIKIPEDIA_API ?? "https://es.wikipedia.org/w/api.php";
 const USER_AGENT = "HuellaPatrimonio/1.0 (https://github.com/jaco25pl/patrimonic)";
 const THUMB_WIDTH = 1280; // a standard Wikimedia thumbnail step
 const BLUR_WIDTH = 40;
 const AVOID = /(interior|detalle|detail|placa|plaque|plano|mapa|map|logo|escudo|coat|firma|signature|\.svg|\.png|\.tif)/i;
 
-async function api(params) {
-  const url = `${API}?${new URLSearchParams({ format: "json", formatversion: "2", origin: "*", ...params })}`;
+async function api(params, base = API) {
+  const url = `${base}?${new URLSearchParams({ format: "json", formatversion: "2", origin: "*", ...params })}`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) throw new Error(`Commons API ${res.status}`);
   return res.json();
@@ -120,6 +121,99 @@ async function resolveAuto(place) {
   return null;
 }
 
+
+// ── Step 3: the lead image of the place's Spanish Wikipedia article ──────────
+async function resolveWikipedia(place) {
+  for (const query of searchQueries(place).slice(0, 2)) {
+    const data = await api(
+      {
+        action: "query",
+        generator: "search",
+        gsrsearch: `${query} Uruguay`,
+        gsrlimit: "5",
+        prop: "pageimages|extracts",
+        piprop: "name",
+        exintro: "1",
+        explaintext: "1",
+        exlimit: "5",
+        exchars: "600",
+      },
+      WIKIPEDIA_API,
+    );
+    const pages = (data.query?.pages ?? []).sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+    for (const page of pages) {
+      if (!page.pageimage) continue;
+      // Same strict rules, judged on the article title + intro instead of a file name.
+      const candidate = { title: page.title, context: `${page.title} ${page.extract ?? ""}` };
+      if (!acceptsAuto(place, candidate)) continue;
+      const files = await resolveFiles([`File:${page.pageimage}`]);
+      const photo = files.get(`File:${page.pageimage}`) ?? [...files.values()][0];
+      if (photo) return photo;
+    }
+  }
+  return null;
+}
+
+// ── Steps 4–5: a real photo of the barrio / town, then of the department ────
+function slugify(t) {
+  return norm(t).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+}
+
+async function searchZone(name, dept, max) {
+  const tokens = distinctiveTokens(name);
+  if (!tokens.length) return [];
+  const queries = name === dept ? [`${name} Uruguay`, name] : [`${name} ${dept}`, `${name} Uruguay`];
+  const found = new Map();
+  for (const q of queries) {
+    const data = await api({ action: "query", generator: "search", gsrsearch: q, gsrnamespace: "6", gsrlimit: "20", ...IMAGEINFO });
+    for (const p of (data.query?.pages ?? []).map(toPhoto)) {
+      if (!p || found.has(p.title) || AVOID.test(p.title)) continue;
+      const title = norm(p.title);
+      const context = norm(p.context);
+      if (!tokens.every((t) => title.includes(t))) continue;
+      if (![dept, "uruguay"].some((w) => context.includes(norm(w)))) continue;
+      found.set(p.title, p);
+    }
+    if (found.size >= max) break;
+  }
+  return [...found.values()].sort((a, b) => score(b) - score(a)).slice(0, max);
+}
+
+const DEPT_CATEGORY = (dept) => (dept === "Montevideo" ? "Category:Montevideo" : `Category:${dept} Department`);
+
+export async function resolveZones(places) {
+  const byZone = new Map();
+  for (const p of places) {
+    const key = `${p.dept}/${p.locality}`;
+    byZone.set(key, [...(byZone.get(key) ?? []), p]);
+  }
+  const deptPhotos = new Map();
+  const deptFor = async (dept) => {
+    if (!deptPhotos.has(dept)) {
+      let photos = await searchZone(dept, dept, 6).catch(() => []);
+      if (!photos.length) photos = [await resolveCategory(DEPT_CATEGORY(dept)).catch(() => null)].filter(Boolean);
+      deptPhotos.set(dept, photos);
+    }
+    return deptPhotos.get(dept);
+  };
+
+  const out = new Map();
+  for (const [, group] of byZone) {
+    const { dept, locality } = group[0];
+    let photos = locality === dept ? [] : await searchZone(locality, dept, Math.min(6, group.length)).catch(() => []);
+    let zone = locality;
+    if (!photos.length) {
+      photos = await deptFor(dept);
+      zone = dept;
+    }
+    group.forEach((place, i) => {
+      const photo = photos[i % photos.length];
+      if (photo) out.set(place.slug, { ...photo, zone });
+    });
+  }
+  return out;
+}
+
 /** Runs `fn` over `items` with at most `n` in flight (polite to the Commons API). */
 async function pool(items, n, fn) {
   const out = new Array(items.length);
@@ -179,16 +273,15 @@ async function resolveCategory(category) {
  * Downloads the thumbnail into /public/photos so the app serves (and Vercel optimizes) it
  * from our own domain: no hotlinking, no dependency on Wikimedia's thumbnail hosts at runtime.
  */
-async function download(slug, src) {
+async function download(file, src) {
   try {
     const res = await fetch(src, { headers: { "User-Agent": USER_AGENT } });
     const type = res.headers.get("content-type") ?? "";
     if (!res.ok || !type.startsWith("image/")) throw new Error(`${res.status} ${type}`);
-    const file = `${slug}.jpg`;
     await writeFile(path.join(PHOTO_DIR, file), Buffer.from(await res.arrayBuffer()));
     return `/photos/${file}`;
   } catch (error) {
-    console.warn(`  · no se pudo descargar ${slug} (${error.message}); se usa la URL remota`);
+    console.warn(`  · no se pudo descargar ${file} (${error.message}); se usa la URL remota`);
     return src;
   }
 }
@@ -241,14 +334,46 @@ async function main() {
     chosen.set(place.slug, { ...photo, auto: true });
   });
 
-  const result = {};
-  await pool([...chosen], 6, async ([slug, photo]) => {
-    const { originalWidth, originalHeight, title, context, ...rest } = photo;
-    result[slug] = { ...rest, src: await download(slug, photo.src), blur: await blurDataUrl(photo.src) };
+  const automatic = chosen.size - curated;
+
+  // Step 3: Wikipedia article image.
+  const noPhoto = places.filter((p) => !chosen.has(p.slug));
+  const fromWiki = await pool(noPhoto, 6, resolveWikipedia);
+  noPhoto.forEach((place, i) => {
+    const photo = fromWiki[i];
+    if (!photo || usedFiles.has(photo.title)) return;
+    usedFiles.add(photo.title);
+    chosen.set(place.slug, { ...photo, auto: true });
+  });
+  const wiki = chosen.size - curated - automatic;
+
+  // Steps 4–5: illustrative photo of the zone, so no place is left without one.
+  const zoned = await resolveZones(places.filter((p) => !chosen.has(p.slug)));
+  for (const [slug, photo] of zoned) chosen.set(slug, { ...photo, auto: true });
+
+  // Download each distinct file once (zone photos are shared).
+  const targets = new Map();
+  for (const [slug, photo] of chosen) if (!targets.has(photo.title)) targets.set(photo.title, photo.zone ? `zona-${slugify(photo.title)}.jpg` : `${slug}.jpg`);
+  const local = new Map();
+  const blurs = new Map();
+  await pool([...targets], 6, async ([title, file]) => {
+    const photo = [...chosen.values()].find((p) => p.title === title);
+    local.set(title, await download(file, photo.src));
+    blurs.set(title, await blurDataUrl(photo.src));
   });
 
+  const result = {};
+  for (const [slug, photo] of chosen) {
+    const { originalWidth, originalHeight, title, context, ...rest } = photo;
+    result[slug] = { ...rest, src: local.get(title), blur: blurs.get(title) };
+  }
+
   await writeFile(OUTPUT, JSON.stringify(result, null, 1) + "\n");
-  console.log(`✓ fotos: ${curated}/${entries.length} curadas + ${chosen.size - curated} automáticas = ${Object.keys(result).length}/${places.length} lugares con foto`);
+  const missing = places.filter((p) => !result[p.slug]).map((p) => p.slug);
+  console.log(
+    `✓ fotos: ${curated} curadas + ${automatic} Commons + ${wiki} Wikipedia + ${zoned.size} de la zona = ${Object.keys(result).length}/${places.length}`,
+  );
+  if (missing.length) console.warn(`  · sin foto (${missing.length}): ${missing.join(", ")}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(async (error) => {

@@ -24,6 +24,8 @@ export interface Photo {
   page: string;
   /** Found by the automatic search (not hand-picked): never used to lead the rail unfiltered. */
   auto?: boolean;
+  /** Set when no photo of the place exists: an illustrative photo of this barrio/town/department. */
+  zone?: string;
 }
 
 /** A venue taking part in the event, as published in the official guide. */
@@ -58,6 +60,8 @@ export interface PlaceSummary {
   photo: Pick<Photo, "src" | "blur"> | null;
   /** Position in the curated "Imperdibles" order; lower is more iconic. Null when not curated. */
   rank: number | null;
+  /** True when the photo shows the zone, not the place itself (kept out of "Imperdibles"). */
+  illustrative: boolean;
   /** Pre-normalized haystack for instant search. */
   search: string;
 }

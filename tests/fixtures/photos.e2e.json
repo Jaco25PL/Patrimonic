@@ -39,5 +39,17 @@
   "licenseUrl": null,
   "page": "https://commons.wikimedia.org/wiki/File:Teatro_Victoria.jpg",
   "auto": true
+ },
+ "facultad-de-medicina-udelar": {
+  "src": "/photos/palacio-salvo.jpg",
+  "width": 1280,
+  "height": 853,
+  "blur": null,
+  "author": "Zona",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": null,
+  "page": "https://commons.wikimedia.org/wiki/File:Aguada.jpg",
+  "auto": true,
+  "zone": "Aguada"
  }
 }

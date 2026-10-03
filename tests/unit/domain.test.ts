@@ -18,6 +18,7 @@ const mk = (o: Partial<PlaceSummary>): PlaceSummary => ({
   photo: null,
   search: "",
   rank: null,
+  illustrative: false,
   ...o,
 });
 const a = mk({ slug: "a", name: "Castillo de Piria", dept: "Canelones", locality: "Progreso", days: ["sab"], category: "palacios", search: normalize("Castillo de Piria Progreso Canelones") });
@@ -125,11 +126,12 @@ describe("localidad y carrusel de imperdibles", () => {
   const cabildo = mk({ slug: "cabildo", locality: "Ciudad Vieja", photo, rank: 3, days: ["dom"] });
   const auto = mk({ slug: "auto", locality: "Ciudad Vieja", photo, rank: null });
   const sinFoto = mk({ slug: "sin-foto", locality: "Ciudad Vieja", rank: null });
+  const zona = mk({ slug: "zona", locality: "Ciudad Vieja", photo, rank: null, illustrative: true });
   const piria = mk({ slug: "piria", dept: "Canelones", locality: "Progreso", photo, rank: 1 });
-  const all = [sinFoto, auto, cabildo, piria, salvo];
+  const all = [sinFoto, zona, auto, cabildo, piria, salvo];
 
   it("filtra por localidad", () => {
-    expect(filterPlaces(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }, new Set()).map((p) => p.slug)).toEqual(["sin-foto", "auto", "cabildo"]);
+    expect(filterPlaces(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }, new Set()).map((p) => p.slug)).toEqual(["sin-foto", "zona", "auto", "cabildo"]);
   });
   it("sin filtros: solo curados, en orden", () => {
     expect(featuredFor(all, EMPTY_CRITERIA).map((p) => p.slug)).toEqual(["salvo", "piria", "cabildo"]);
@@ -140,6 +142,9 @@ describe("localidad y carrusel de imperdibles", () => {
   it("con localidad y día", () => {
     expect(featuredFor(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }).map((p) => p.slug)).toEqual(["cabildo", "auto"]);
     expect(featuredFor(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja", day: "sab" }).map((p) => p.slug)).toEqual(["auto"]);
+  });
+  it("las fotos ilustrativas de zona nunca entran al carrusel", () => {
+    expect(featuredFor(all, { ...EMPTY_CRITERIA, locality: "Ciudad Vieja" }).map((p) => p.slug)).not.toContain("zona");
   });
   it("se oculta al buscar o en Mi recorrido", () => {
     expect(featuredFor(all, { ...EMPTY_CRITERIA, query: "x" })).toEqual([]);
