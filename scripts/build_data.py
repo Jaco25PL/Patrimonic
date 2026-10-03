@@ -74,6 +74,7 @@ def main():
         if e.get("skip"):
             continue
         program = [clean(p) for p in e["program"] if clean(p)]
+        program = e.get("programPrepend", []) + program[e.get("programDrop", 0):]
         address = clean(e["address"])
         activity = clean(e["activity"])
         if not address and activity and ADDRESS_HINT.search(activity) and len(activity) < 70:

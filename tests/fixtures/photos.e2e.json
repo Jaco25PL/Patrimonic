@@ -1,0 +1,5 @@
+{
+ "palacio-salvo": { "src": "/icons/512", "width": 512, "height": 512, "blur": null, "author": "Autor de prueba", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Test.jpg" },
+ "museo-taller-de-casapueblo": { "src": "/icons/192", "width": 192, "height": 192, "blur": null, "author": "Autor de prueba", "license": null, "licenseUrl": null, "page": "https://commons.wikimedia.org/wiki/File:Test2.jpg" },
+ "castillo-de-piria": { "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Does_not_exist.jpg/1280px-Does_not_exist.jpg", "width": 1280, "height": 853, "blur": null, "author": "Roto", "license": null, "licenseUrl": null, "page": "https://commons.wikimedia.org/wiki/File:Does_not_exist.jpg" }
+}

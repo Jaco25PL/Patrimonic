@@ -71,6 +71,73 @@
     },
     "169": {
       "addressOverride": "Domingo Cullen 895 esq. Avda. Sarmiento"
+    },
+    "76": {
+      "addressOverride": "Ituzaingó 1492 entre 25 de Mayo y Cerrito",
+      "activity": "Muestra de piezas inspiradas en el arte precolombino y espacio abierto para experimentar técnicas ancestrales",
+      "programDrop": 2
+    },
+    "80": {
+      "addressOverride": "Rambla 25 de Agosto de 1825 S/N y Pérez Castellano",
+      "activity": "Visita, demostraciones y muestras estáticas de unidades de la Armada Nacional",
+      "programDrop": 2
+    },
+    "146": {
+      "addressOverride": "Ecoparque Idea Vilariño, Malvín Norte"
+    },
+    "207": {
+      "addressOverride": "Franzini 844 esq. José Scosería",
+      "activity": "Aportes filosóficos de la comunidad indígena de Uruguay y la región",
+      "programDrop": 2
+    },
+    "210": {
+      "addressOverride": "Bvar. Artigas 136 esq. Parva Domus",
+      "activity": "Exposiciones varias: taxímetros, maquetas, filatelia y museo parvense",
+      "programDrop": 2
+    },
+    "227": {
+      "addressOverride": "Manuel Hernández Luna 2266 esq. Acevedo Díaz",
+      "activity": "Objetos de empresas uruguayas que ya no existen, cine, TV, radios y cámaras",
+      "programDrop": 2
+    },
+    "236": {
+      "addressOverride": "Miguelete 1825 entre República y Arenal Grande",
+      "activity": "Charla: Campanas zoomorfas, fusiones del mundo animal",
+      "programDrop": 2
+    },
+    "280": {
+      "addressOverride": "Luis A. Herrera esq. Ámsterdam",
+      "activity": "Charla: El Libro de Mormón como registro sagrado de la América indígena; Taller de Historia Familiar",
+      "programDrop": 2,
+      "programPrepend": [
+        "Viernes 2 y sábado 3",
+        "Viernes 2 de 19 a 20 h y sábado 3 de 17 a 19 h. La Iglesia de Jesucristo desea compartir con su comunidad un espacio de intercambio sobre la temática. Local con accesibilidad y atención personalizada."
+      ]
+    },
+    "315": {
+      "addressOverride": "Luis Dreyer y Artigas",
+      "activity": "Visita al mirador del tanque de OSE, construido en 1948 por el Arq. Luiggi Bogattini",
+      "programDrop": 2
+    },
+    "340": {
+      "addressOverride": "Batallón Asencio de Infantería N.° 5, Mercedes",
+      "activity": "Visita guiada y exposición de equipamiento",
+      "programDrop": 1
+    },
+    "356": {
+      "addressOverride": "Sarandí 1184",
+      "activity": "Exhibición de la colección de piezas sobre culturas amerindias de Daniel Vidart",
+      "programDrop": 2
+    },
+    "422": {
+      "addressOverride": "Ituzaingó esq. Rambla del Sandú",
+      "activity": "Recorrido por lugares señalizados de la ciudad",
+      "programDrop": 2
+    },
+    "485": {
+      "addressOverride": "Ruta Nacional 9 km 302, Parque Nacional Santa Teresa",
+      "activity": "Recorridos autogestionados por el patrimonio histórico, natural y paisajístico del parque",
+      "programDrop": 2
     }
   }
 }
