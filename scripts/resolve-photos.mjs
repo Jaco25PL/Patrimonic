@@ -6,15 +6,16 @@
 // is unreachable, the previously generated file is kept and places without a
 // photo fall back to the illustrated poster.
 
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SOURCES = path.join(ROOT, "data/photo-sources.json");
-const OUTPUT = path.join(ROOT, "src/data/photos.generated.json");
+const SOURCES = process.env.PHOTOS_SOURCES ?? path.join(ROOT, "data/photo-sources.json");
+const OUTPUT = process.env.PHOTOS_OUTPUT ?? path.join(ROOT, "src/data/photos.generated.json");
+const PHOTO_DIR = process.env.PHOTOS_DIR ?? path.join(ROOT, "public/photos");
 
-const API = "https://commons.wikimedia.org/w/api.php";
+const API = process.env.COMMONS_API ?? "https://commons.wikimedia.org/w/api.php";
 const USER_AGENT = "HuellaPatrimonio/1.0 (https://github.com/jaco25pl/patrimonic)";
 const THUMB_WIDTH = 1280; // a standard Wikimedia thumbnail step
 const BLUR_WIDTH = 40;
@@ -96,6 +97,24 @@ async function resolveCategory(category) {
   return photos[0] ?? null;
 }
 
+/**
+ * Downloads the thumbnail into /public/photos so the app serves (and Vercel optimizes) it
+ * from our own domain: no hotlinking, no dependency on Wikimedia's thumbnail hosts at runtime.
+ */
+async function download(slug, src) {
+  try {
+    const res = await fetch(src, { headers: { "User-Agent": USER_AGENT } });
+    const type = res.headers.get("content-type") ?? "";
+    if (!res.ok || !type.startsWith("image/")) throw new Error(`${res.status} ${type}`);
+    const file = `${slug}.jpg`;
+    await writeFile(path.join(PHOTO_DIR, file), Buffer.from(await res.arrayBuffer()));
+    return `/photos/${file}`;
+  } catch (error) {
+    console.warn(`  · no se pudo descargar ${slug} (${error.message}); se usa la URL remota`);
+    return src;
+  }
+}
+
 async function blurDataUrl(src) {
   const small = src.replace(/\/\d+px-/, `/${BLUR_WIDTH}px-`);
   if (small === src) return null;
@@ -113,6 +132,9 @@ async function main() {
   const { places } = JSON.parse(await readFile(SOURCES, "utf8"));
   const entries = Object.entries(places);
 
+  await rm(PHOTO_DIR, { recursive: true, force: true });
+  await mkdir(PHOTO_DIR, { recursive: true });
+
   const fileTitles = [...new Set(entries.flatMap(([, list]) => list.filter((s) => s.startsWith("File:"))))];
   const files = await resolveFiles(fileTitles);
 
@@ -128,7 +150,7 @@ async function main() {
       continue;
     }
     const { originalWidth, originalHeight, title, ...rest } = photo;
-    result[slug] = { ...rest, blur: await blurDataUrl(photo.src) };
+    result[slug] = { ...rest, src: await download(slug, photo.src), blur: await blurDataUrl(photo.src) };
   }
 
   await writeFile(OUTPUT, JSON.stringify(result, null, 1) + "\n");

@@ -84,5 +84,15 @@ test("slug inexistente da 404 amigable", async ({ page }) => {
 test("metadatos para compartir (OG)", async ({ page }) => {
   await page.goto("/lugar/palacio-salvo");
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", "Palacio Salvo");
-  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /icons\/512/);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /photos\/palacio-salvo\.jpg/);
+});
+
+test("regresión: el optimizador acepta fotos de cualquier host de Wikimedia (no 400)", async ({ request }) => {
+  for (const host of ["upload.wikimedia.org", "thumb.wikimedia.org"]) {
+    const res = await request.get(`/_next/image?url=${encodeURIComponent(`https://${host}/wikipedia/commons/thumb/a/ab/X.jpg/1280px-X.jpg`)}&w=640&q=75`);
+    expect(res.status(), host).not.toBe(400);
+  }
+  const local = await request.get(`/_next/image?url=${encodeURIComponent("/photos/palacio-salvo.jpg")}&w=640&q=75`);
+  expect(local.status()).toBe(200);
+  expect(local.headers()["content-type"]).toMatch(/image\/(avif|webp|jpeg)/);
 });

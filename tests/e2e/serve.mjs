@@ -1,10 +1,13 @@
 // Builds the app with fixture photos (one local OK, one broken remote) and serves it.
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync, spawn } from "node:child_process";
 
 const target = "src/data/photos.generated.json";
 const original = readFileSync(target);
 copyFileSync("tests/fixtures/photos.e2e.json", target);
+// Simulates a photo downloaded by scripts/resolve-photos.mjs at build time.
+mkdirSync("public/photos", { recursive: true });
+copyFileSync("tests/fixtures/photo.jpg", "public/photos/palacio-salvo.jpg");
 try {
   execSync("npx next build", { stdio: "inherit" });
 } finally {

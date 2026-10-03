@@ -3,7 +3,7 @@
  *  - /_next/static:    cache first (content-hashed, immutable).
  *  - Images:           stale-while-revalidate, capped.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const PAGES = `pages-${VERSION}`;
 const STATIC = `static-${VERSION}`;
 const IMAGES = `images-${VERSION}`;
