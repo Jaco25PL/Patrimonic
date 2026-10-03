@@ -92,19 +92,32 @@ export function acceptsAuto(place, photo) {
   return [place.locality, place.dept, "uruguay", "montevideo"].some((w) => context.includes(norm(w)));
 }
 
+/** Name without the guide's suffixes: "Facultad de Química – Udelar" → "Facultad de Química". */
+export function searchName(name) {
+  return name
+    .split(/\s[–—-]\s|\s\|\s|[(“"]/)[0]
+    .replace(/[,.:;]+$/, "")
+    .trim();
+}
+
+/**
+ * Commons full-text search requires every word to match, so extra words kill recall.
+ * Try the clean name first, then with the department, then with the locality.
+ */
+export function searchQueries(place) {
+  const base = searchName(place.name);
+  const quoted = place.name.match(/[“"]([^”"]{4,})[”"]/)?.[1]; // Museo Militar “Fortaleza General Artigas”
+  return [...new Set([base, quoted, `${base} ${place.dept}`, `${base} ${place.locality}`].filter(Boolean))];
+}
+
 async function resolveAuto(place) {
-  const where = place.locality === place.dept ? place.dept : `${place.locality} ${place.dept}`;
-  const data = await api({
-    action: "query",
-    generator: "search",
-    gsrsearch: `${place.name} ${where}`,
-    gsrnamespace: "6",
-    gsrlimit: "10",
-    ...IMAGEINFO,
-  });
-  const photos = (data.query?.pages ?? []).map(toPhoto).filter((p) => p && acceptsAuto(place, p));
-  photos.sort((a, b) => score(b) - score(a));
-  return photos[0] ?? null;
+  for (const query of searchQueries(place)) {
+    const data = await api({ action: "query", generator: "search", gsrsearch: query, gsrnamespace: "6", gsrlimit: "10", ...IMAGEINFO });
+    const photos = (data.query?.pages ?? []).map(toPhoto).filter((p) => p && acceptsAuto(place, p));
+    photos.sort((a, b) => score(b) - score(a));
+    if (photos[0]) return photos[0];
+  }
+  return null;
 }
 
 /** Runs `fn` over `items` with at most `n` in flight (polite to the Commons API). */

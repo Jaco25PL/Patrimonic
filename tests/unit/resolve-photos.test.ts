@@ -48,6 +48,8 @@ function handler(req: import("node:http").IncomingMessage, res: import("node:htt
   const search = url.searchParams.get("gsrsearch") ?? "";
   if (search.startsWith("Teatro Victoria")) pages = [info("Teatro Victoria (Montevideo) fachada.jpg", 3000, 2000), info("Teatro Colón.jpg", 3000, 2000)];
   if (search.startsWith("Museo de la Memoria")) pages = [info("Museo de la Memoria Rosario Argentina.jpg", 3000, 2000)];
+  // Like CirrusSearch: every word must match, so "Facultad de Química Aguada" finds nothing
+  if (search === "Facultad de Química") pages = [info("Facultad de Química, Universidad de la República (Montevideo).jpg", 3000, 2000)];
   if (search.startsWith("Taller de Arte")) pages = [info("Taller de arte.jpg", 3000, 2000)];
   if (url.searchParams.get("titles")) pages = [info("Good.jpg", 4000, 3000), info("broken.jpg", 4000, 3000)];
   if (url.searchParams.get("gcmtitle") === "Category:Mix")
@@ -86,6 +88,7 @@ describe("resolve-photos (build)", () => {
         P("teatro-victoria", "Teatro Victoria"),
         P("museo-de-la-memoria", "Museo de la Memoria"),
         P("taller-de-arte", "Taller de Arte"),
+        { slug: "facultad-de-quimica-udelar", name: "Facultad de Química – Udelar", locality: "Aguada", dept: "Montevideo" },
       ]),
     );
     const out = path.join(dir, "out.json");
@@ -112,15 +115,17 @@ describe("resolve-photos (build)", () => {
     expect(result["museo-de-la-memoria"]).toBeUndefined();
     expect(result["taller-de-arte"]).toBeUndefined();
     expect(result["lugar-file"].auto).toBeUndefined();
+    // Busca primero con el nombre limpio (sin "– Udelar" ni el barrio)
+    expect(result["facultad-de-quimica-udelar"]).toMatchObject({ auto: true });
 
-    expect((await readdir(photos)).sort()).toEqual(["lugar-categoria.jpg", "lugar-file.jpg", "teatro-victoria.jpg"]);
+    expect((await readdir(photos)).sort()).toEqual(["facultad-de-quimica-udelar.jpg", "lugar-categoria.jpg", "lugar-file.jpg", "teatro-victoria.jpg"]);
     expect(seen.every((s) => s.endsWith("ua-ok"))).toBe(true); // Wikimedia exige User-Agent
   });
 });
 
 describe("reglas de la búsqueda automática", async () => {
   // @ts-expect-error — plain ESM build script
-  const { acceptsAuto, distinctiveTokens } = await import("../../scripts/resolve-photos.mjs");
+  const { acceptsAuto, distinctiveTokens, searchName, searchQueries } = await import("../../scripts/resolve-photos.mjs");
   const place = (name: string, locality = "Centro", dept = "Montevideo") => ({ name, locality, dept });
   const photo = (title: string, context = "Uruguay") => ({ title: `File:${title}`, context: `${title} ${context}` });
 
@@ -138,6 +143,21 @@ describe("reglas de la búsqueda automática", async () => {
   ])("%s ← %s → %s", (name, title, ok) => {
     const context = name.includes("Panamá") ? "Panama City" : "Montevideo Uruguay";
     expect(acceptsAuto(place(name), photo(title, context))).toBe(ok);
+  });
+  it("limpia el nombre para buscar", () => {
+    expect(searchName("Facultad de Química – Udelar")).toBe("Facultad de Química");
+    expect(searchName("Museo Militar “Fortaleza General Artigas”")).toBe("Museo Militar");
+    expect(searchName("Palacio de la Luz (UTE)")).toBe("Palacio de la Luz");
+    expect(searchQueries({ name: "Teatro Victoria", locality: "Centro", dept: "Montevideo" })).toEqual([
+      "Teatro Victoria",
+      "Teatro Victoria Montevideo",
+      "Teatro Victoria Centro",
+    ]);
+  });
+  it("también busca por el nombre entre comillas", () => {
+    expect(searchQueries({ name: "Museo Militar “Fortaleza General Artigas”", locality: "Cerro", dept: "Montevideo" })[1]).toBe(
+      "Fortaleza General Artigas",
+    );
   });
   it("exige que la foto sea de Uruguay", () => {
     expect(acceptsAuto(place("Museo de la Memoria"), photo("Museo de la Memoria.jpg", "Santiago de Chile"))).toBe(false);
