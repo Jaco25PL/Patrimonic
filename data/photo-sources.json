@@ -1,0 +1,269 @@
+{
+  "$comment": "Wikimedia Commons sources per place slug, tried in order. 'File:' = exact file, 'Category:' = best landscape photo of that category. Resolved at build time by scripts/resolve-photos.mjs. Order = order of the 'Imperdibles' rail.",
+  "places": {
+    "palacio-salvo": [
+      "File:Palacio Salvo, Montevideo, Uruguay.jpg",
+      "File:Palacio Salvo 1.JPG",
+      "Category:Palacio Salvo"
+    ],
+    "explanada-del-palacio-legislativo": [
+      "File:Palacio Legislativo, Montevideo, Uruguay.JPG",
+      "File:Palacio Legislativo - Vista Frontal.jpg",
+      "Category:Palacio Legislativo, Uruguay"
+    ],
+    "museo-taller-de-casapueblo": [
+      "File:Casapueblo.JPG",
+      "File:Casapueblo (Punta Ballena).jpg",
+      "Category:Casapueblo"
+    ],
+    "faro-de-colonia": [
+      "File:Faro de Colonia del Sacramento, Uruguay2.JPG",
+      "File:Faro de Colonia del Sacramento Uruguay.JPG",
+      "Category:Faro de Colonia"
+    ],
+    "castillo-de-piria": [
+      "File:Castillo Piria.jpg",
+      "Category:Castillo de Piria"
+    ],
+    "museo-de-artes-decorativas-palacio-taranco": [
+      "File:Palacio Taranco by MaxiCiccone.JPG",
+      "Category:Palacio Taranco"
+    ],
+    "museo-historico-cabildo": [
+      "File:Museo Histórico Cabildo 2021.jpg",
+      "Category:Cabildo de Montevideo"
+    ],
+    "museo-militar-fortaleza-de-santa-teresa": [
+      "File:Fortaleza Santa Teresa, Rocha, Uruguay.JPG",
+      "File:Fortaleza de Santa Teresa.jpg"
+    ],
+    "museo-militar-fortaleza-general-artigas": [
+      "File:Fortaleza del cerro (vista de Montevideo).jpg",
+      "File:Fortaleza del Cerro de Montevideo4.JPG",
+      "Category:Fortaleza del Cerro"
+    ],
+    "argentino-hotel": [
+      "File:Argentino Hotel de Piriápolis.JPG",
+      "Category:Argentino Hotel, Piriápolis"
+    ],
+    "museo-de-la-revolucion-industrial": [
+      "File:Frigorifico Anglo.JPG",
+      "File:Frigorifico Anglo... - Fray Bentos - Rio Negro - Uruguay.JPG",
+      "Category:Frigorífico Anglo del Uruguay"
+    ],
+    "palacio-piria-sede-de-la-suprema-corte-de-justicia": [
+      "File:Palacio Piria el Palacio de las rosas.JPG",
+      "File:Suprema Corte de Justicia.JPG",
+      "Category:Palacio Piria"
+    ],
+    "castillo-pittamiglio-las-flores-siete-localidades-un-mismo-d": [
+      "File:Castillo Pittamiglio en Maldonado, Uruguay.JPG",
+      "Category:Castillo Pittamiglio, Las Flores"
+    ],
+    "mausoleo-al-procer-gral-jose-g-artigas": [
+      "File:Monumento ecuestre del Gral Jose Gervasio Artigas en Plaza Independencia.JPG",
+      "File:Mausoleo de Gral Jose Gervasio Artigas.JPG",
+      "Category:Mausoleum of General José Gervasio Artigas"
+    ],
+    "estancia-de-belen-calera-de-las-huerfanas": [
+      "File:Calera de las Huérfanas, próxima a ciudad de Carmelo, Colonia.JPG",
+      "Category:Calera de las Huérfanas"
+    ],
+    "castillo-idiarte-borda": [
+      "File:Castillo Idiarte Borda.JPG",
+      "Category:Quinta de Idiarte Borda"
+    ],
+    "palacio-de-la-luz-ute": [
+      "Category:Palacio de la Luz, Montevideo"
+    ],
+    "plaza-matriz-frente-a-la-catedral": [
+      "File:Catedral Metropolitana Montevideo.JPG",
+      "File:Plaza Matriz de Montevideo.JPG"
+    ],
+    "ateneo-de-montevideo": [
+      "File:Ateneo de Montevideo. Vista desde la Plaza de Cagancha..JPG",
+      "Category:Ateneo de Montevideo"
+    ],
+    "basilica-ntra-sra-del-rosario-y-san-benito-de-palermo": [
+      "File:Basílica Nuestra Señora y San Benito de Palermo.JPG",
+      "Category:Iglesia de Nuestra Señora del Rosario y San Benito de Palermo, Paysandú"
+    ],
+    "teatro-larranaga": [
+      "File:TEATRO LARRAÑAGA REFORMADO.JPG",
+      "Category:Teatro Larrañaga, Salto"
+    ],
+    "catedral-de-san-jose": [
+      "File:Vista de la Basílica Catedral de San José de Mayo 02.JPG",
+      "Category:Cathedral of San José de Mayo"
+    ],
+    "yacht-club-uruguayo": [
+      "File:Yacht Club Uruguayo y puerto del Buceo desde Rambla Armenia.JPG"
+    ],
+    "centro-de-estudios-historicos-navales-y-maritimos-museo-nava": [
+      "File:Museo Naval Montevideo.JPG"
+    ],
+    "aduana-de-oribe-museo-del-arma-de-ingenieros": [
+      "File:Saladero de Seco y Aduana de Oribe desde el Este.JPG",
+      "Category:Aduana de Oribe"
+    ],
+    "cementerio-britanico-de-montevideo": [
+      "File:British Cemetery, Montevideo - March 2017.jpg",
+      "Category:British Cemetery Montevideo"
+    ],
+    "palacio-santos-ministerio-de-relaciones-exteriores": [
+      "Category:Palacio Santos"
+    ],
+    "sodre": [
+      "Category:Auditorio Nacional Adela Reta"
+    ],
+    "museo-del-carnaval": [
+      "File:Museo del Carnaval Uruguay.jpg",
+      "File:Fachada del Museo del Carnaval.jpg",
+      "Category:Museo del Carnaval, Montevideo"
+    ],
+    "museo-torres-garcia": [
+      "Category:Museo Torres García"
+    ],
+    "museo-de-arte-precolombino-e-indigena-mapi": [
+      "Category:Museo de Arte Precolombino e Indígena"
+    ],
+    "museo-de-la-casa-de-gobierno": [
+      "File:Palacio Estevez Montevideo.jpg",
+      "Category:Palacio Estévez"
+    ],
+    "palacio-de-correos-correo-uruguayo": [
+      "Category:Palacio de Correos de Montevideo"
+    ],
+    "estado-campeon-del-siglo": [
+      "File:Estadio Campeón del Siglo setiembre 2021.jpg",
+      "Category:Estadio Campeón del Siglo"
+    ],
+    "edificio-mercosur": [
+      "Category:Edificio Mercosur"
+    ],
+    "faro-de-punta-del-este": [
+      "Category:Faro de Punta del Este"
+    ],
+    "faro-de-jose-ignacio": [
+      "Category:Faro de José Ignacio"
+    ],
+    "faro-de-santa-maria": [
+      "Category:Faro de La Paloma"
+    ],
+    "faro-de-punta-brava": [
+      "Category:Faro de Punta Carretas"
+    ],
+    "museo-militar-fuerte-san-miguel": [
+      "Category:Fuerte de San Miguel"
+    ],
+    "cuartel-de-dragones": [
+      "Category:Cuartel de Dragones (Maldonado)"
+    ],
+    "visita-libre-al-arboretum-lussich-parque-museo-del-azulejo-t": [
+      "Category:Arboretum Lussich"
+    ],
+    "museo-ralli-de-punta-del-este": [
+      "Category:Museo Ralli (Punta del Este)"
+    ],
+    "casa-museo-chalet-las-nubes": [
+      "Category:Chalet Las Nubes"
+    ],
+    "centro-cultura-gran-hotel-concordia": [
+      "Category:Hotel Concordia (Salto)"
+    ],
+    "museo-monumento-a-perpetuidad": [
+      "Category:Monumento a Perpetuidad"
+    ],
+    "central-hidroelectrica-constitucion": [
+      "Category:Palmar Dam"
+    ],
+    "central-rincon-del-bonete": [
+      "Category:Rincón del Bonete Dam"
+    ],
+    "museo-historico-de-durazno-casa-de-rivera": [
+      "Category:Casa de Rivera (Durazno)"
+    ],
+    "catedral-de-florida-santuario-nacional-de-la-patrona-del-uru": [
+      "Category:Cathedral of Florida, Uruguay"
+    ],
+    "sitio-jual-bilu": [
+      "Category:Quebrada de los Cuervos"
+    ],
+    "museo-del-agua-ose": [
+      "Category:Aguas Corrientes"
+    ],
+    "jardin-historico-quinta-capurro": [
+      "Category:Quinta Capurro"
+    ],
+    "museo-juan-manuel-blanes": [
+      "Category:Museo Juan Manuel Blanes"
+    ],
+    "parque-prado-homenaje-a-los-ultimos-charruas": [
+      "Category:Monumento a los últimos charrúas"
+    ],
+    "residencia-presidencial-del-prado-suarez-reyes": [
+      "Category:Residencia de Suárez y Reyes"
+    ],
+    "museo-zorrilla": [
+      "Category:Museo Zorrilla"
+    ],
+    "facultad-de-derecho-udelar": [
+      "Category:Universidad de la República (Main Building)"
+    ],
+    "iava-instituto-alfredo-vazquez-acevedo": [
+      "File:Instituto A.V. Acevedo, Montevideo 19.jpg",
+      "Category:Instituto Alfredo Vázquez Acevedo"
+    ],
+    "facultad-de-arquitectura-diseno-y-urbanismo": [
+      "Category:Facultad de Arquitectura, Universidad de la República"
+    ],
+    "hospital-de-clinicas": [
+      "Category:Hospital de Clínicas Dr. Manuel Quintela"
+    ],
+    "molino-de-perez-y-parque-baroffio": [
+      "Category:Molino de Pérez"
+    ],
+    "parque-batlle": [
+      "Category:Parque Batlle"
+    ],
+    "teatro-victoria": [
+      "Category:Teatro Victoria (Montevideo)"
+    ],
+    "observatorio-astronomico-de-montevideo": [
+      "Category:Observatorio Astronómico de Montevideo"
+    ],
+    "hall-de-casa-central-del-brou": [
+      "Category:Banco de la República Oriental del Uruguay (headquarters)"
+    ],
+    "casa-lavalleja-museo-historico-nacional": [
+      "Category:Casa de Lavalleja"
+    ],
+    "casa-rivera-museo-historico-nacional": [
+      "Category:Casa de Rivera (Montevideo)"
+    ],
+    "museo-gurvich": [
+      "Category:Museo Gurvich"
+    ],
+    "museo-andes-1972": [
+      "Category:Museo Andes 1972"
+    ],
+    "museo-nacional-de-antropologia": [
+      "Category:Museo Nacional de Antropología (Uruguay)"
+    ],
+    "teatro-escayola": [
+      "Category:Teatro Escayola"
+    ],
+    "museo-del-indio-tacuarembo": [
+      "Category:Museo del Indio y del Gaucho Washington Escobar"
+    ],
+    "castillo-soneira": [
+      "Category:Castillo Soneira"
+    ],
+    "villa-yerua-museo-del-tango-y-el-turf": [
+      "Category:Villa Yerúa"
+    ],
+    "iglesia-nuestra-senora-de-lourdes": [
+      "Category:Iglesia de Nuestra Señora de Lourdes (Montevideo)"
+    ]
+  }
+}

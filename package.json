@@ -1,0 +1,32 @@
+{
+  "name": "huella",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Guía del Día del Patrimonio 2026 en Uruguay",
+  "scripts": {
+    "dev": "next dev",
+    "photos": "node scripts/resolve-photos.mjs",
+    "prebuild": "node scripts/resolve-photos.mjs",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "data": "python3 scripts/parse_guide.py guia.pdf > data/raw-guide.json && python3 scripts/build_data.py"
+  },
+  "dependencies": {
+    "next": "16.3.8",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}

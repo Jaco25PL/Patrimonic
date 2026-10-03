@@ -1,0 +1,76 @@
+{
+  "defaultLocality": {
+    "Montevideo": "Centro",
+    "Canelones": "Atlántida",
+    "Cerro Largo": "Melo"
+  },
+  "localityRename": {
+    "PORVENIR": "Porvenir",
+    "La tablada": "La Tablada"
+  },
+  "category": {},
+  "entries": {
+    "2": {
+      "locality": "Ciudad Vieja"
+    },
+    "3": {
+      "locality": "Centro",
+      "name": "Museo Sagrada Familia “Hno. Mario Ducuet”",
+      "activity": "Recorriendo nuestro acervo"
+    },
+    "4": {
+      "locality": "Centro"
+    },
+    "82": {
+      "address": "25 de Mayo 428 esq. Misiones",
+      "activity": "Visitas a la Hemeroteca"
+    },
+    "98": {
+      "address": "Juncal y Buenos Aires",
+      "activity": null
+    },
+    "99": {
+      "address": "Juncal y Buenos Aires, explanada del Teatro Solís",
+      "activity": null
+    },
+    "105": {
+      "address": "Juncal y Buenos Aires, explanada del Teatro Solís",
+      "activity": null
+    },
+    "109": {
+      "name": "Museo de Arte Precolombino e Indígena – MAPI"
+    },
+    "237": {
+      "dept": "Canelones"
+    },
+    "238": {
+      "dept": "Canelones"
+    },
+    "320": {
+      "name": "Escuela N.° 119 Santa Ana",
+      "activity": "Mi escuela, nuestra historia. Conociendo nuestras raíces",
+      "address": "Santa Ana Ensanchada, Cardenales"
+    },
+    "83": {
+      "addressOverride": "Rincón 437 esq. Misiones"
+    },
+    "102": {
+      "addressOverride": "Cerrito 351 esq. Zabala"
+    },
+    "108": {
+      "addressOverride": "Rincón 619"
+    },
+    "112": {
+      "addressOverride": "Juan Carlos Gómez 1427"
+    },
+    "208": {
+      "addressOverride": "Faro de Punta Carretas, Punta Carretas"
+    },
+    "418": {
+      "addressOverride": "Central Hidroeléctrica Rincón del Bonete"
+    },
+    "169": {
+      "addressOverride": "Domingo Cullen 895 esq. Avda. Sarmiento"
+    }
+  }
+}

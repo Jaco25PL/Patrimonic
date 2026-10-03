@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Tokens ─────────────────────────
+   Warm paper neutrals + an ochre accent taken from the red pigment of the
+   Chamangá rock paintings (this edition's theme: "Raíces indígenas"). */
+:root {
+  --bg: #f6f4f0;
+  --surface: #ffffff;
+  --surface-2: #eeebe5;
+  --fill: rgb(120 110 95 / 0.12);
+  --fill-strong: rgb(120 110 95 / 0.2);
+  --text: #1b1916;
+  --text-2: rgb(27 25 22 / 0.62);
+  --text-3: rgb(27 25 22 / 0.4);
+  --separator: rgb(27 25 22 / 0.09);
+  --accent: #b5441b;
+  --accent-pressed: #9c3814;
+  --accent-soft: rgb(181 68 27 / 0.1);
+  --on-accent: #ffffff;
+  --material: rgb(246 244 240 / 0.86);
+  --material-border: rgb(255 255 255 / 0.6);
+  --shadow-card: 0 1px 2px rgb(27 25 22 / 0.04), 0 8px 24px -12px rgb(27 25 22 / 0.18);
+  --shadow-float: 0 10px 40px -10px rgb(27 25 22 / 0.35);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-rounded: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0c0b;
+    --surface: #1a1816;
+    --surface-2: #23211e;
+    --fill: rgb(200 190 175 / 0.12);
+    --fill-strong: rgb(200 190 175 / 0.2);
+    --text: #f3f0eb;
+    --text-2: rgb(243 240 235 / 0.62);
+    --text-3: rgb(243 240 235 / 0.38);
+    --separator: rgb(243 240 235 / 0.1);
+    --accent: #e8703f;
+    --accent-pressed: #d25f30;
+    --accent-soft: rgb(232 112 63 / 0.14);
+    --on-accent: #1b0d06;
+    --material: rgb(20 19 17 / 0.84);
+    --material-border: rgb(255 255 255 / 0.08);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --shadow-float: 0 10px 40px -10px rgb(0 0 0 / 0.7);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-separator: var(--separator);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --font-sans: var(--font-sans);
+  --font-rounded: var(--font-rounded);
+  --ease-out: var(--ease-out);
+}
+
+/* ───────────────────────── Base / native feel ───────────────────────── */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem; /* 17px — iOS body */
+  line-height: 1.47;
+  letter-spacing: -0.01em;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+a,
+button,
+[role="button"],
+label,
+summary {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px; /* never trigger iOS zoom */
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* ───────────────────────── Typography scale ─────────────────────────
+   Size-specific tracking: tight for display, neutral for body. */
+.t-large-title {
+  font-size: clamp(2.125rem, 6vw, 2.75rem);
+  line-height: 1.06;
+  letter-spacing: -0.028em;
+  font-weight: 700;
+}
+.t-title {
+  font-size: 1.75rem;
+  line-height: 1.12;
+  letter-spacing: -0.024em;
+  font-weight: 700;
+}
+.t-title-2 {
+  font-size: 1.375rem;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.t-headline {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+  font-weight: 600;
+}
+.t-subhead {
+  font-size: 0.9375rem;
+  line-height: 1.38;
+  letter-spacing: -0.006em;
+}
+.t-footnote {
+  font-size: 0.8125rem;
+  line-height: 1.38;
+  letter-spacing: 0;
+}
+.t-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ───────────────────────── Materials ───────────────────────── */
+.material {
+  background: var(--material);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+.material-dark {
+  background: rgb(20 18 16 / 0.38);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.22);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material {
+    background: var(--bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .material-dark {
+    background: rgb(20 18 16 / 0.85);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ───────────────────────── Press feedback ─────────────────────────
+   Responds on press, not release. */
+.pressable {
+  transition: transform 160ms var(--ease-out), opacity 160ms var(--ease-out), background-color 160ms ease;
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+.pressable-row {
+  transition: background-color 120ms ease;
+}
+.pressable-row:active {
+  background-color: var(--fill);
+  transition-duration: 0ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pressable-row:hover {
+    background-color: var(--fill);
+  }
+  .hover-lift {
+    transition: transform 300ms var(--ease-out);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ───────────────────────── Layout helpers ───────────────────────── */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 1rem;
+  padding-inline: 1rem;
+}
+.rail > * {
+  scroll-snap-align: start;
+  flex: none;
+}
+@media (min-width: 768px) {
+  .rail {
+    scroll-padding-inline: 2rem;
+    padding-inline: 2rem;
+  }
+}
+
+/* Off-screen rows skip layout & paint until scrolled near. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 88px;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.75rem);
+}
+
+/* Scroll edge effect instead of a hard divider under floating chrome. */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent);
+}
+
+/* ───────────────────────── Motion ───────────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.anim-rise {
+  animation: rise 520ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+.anim-settle {
+  animation: settle 700ms var(--ease-out) both;
+}
+.anim-fade {
+  animation: fade 320ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-settle {
+    animation: fade 200ms ease both;
+  }
+  .pressable:active {
+    transform: none;
+    opacity: 0.7;
+  }
+  .hover-lift:hover {
+    transform: none;
+  }
+}
+
+/* Bottom sheet — enters from (and returns to) the bottom edge. */
+.sheet-scrim {
+  transition: opacity 300ms ease;
+  @starting-style {
+    opacity: 0;
+  }
+}
+.sheet-panel {
+  transition: transform 450ms var(--ease-drawer);
+  @starting-style {
+    transform: translateY(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel {
+    transition: opacity 200ms ease;
+    @starting-style {
+      opacity: 0;
+      transform: none;
+    }
+  }
+}
+
+.toast {
+  transition: transform 400ms var(--ease-out), opacity 300ms ease;
+  @starting-style {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+}
